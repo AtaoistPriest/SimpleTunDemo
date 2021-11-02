@@ -419,26 +419,6 @@ func NewTun(name string, ip string, netMask string, mtu int)  (Device, error){
 	return tun, nil
 }
 
-func NewTunReader(name string, ip string, netMask string) (Device, error){
-	//res := net.SetNicAddress(name, ip, netMask)
-	//if res < 0{
-	//	return nil, errors.New("ip address set Error")
-	//}
-	nfd, err := unix.Open(cloneDevicePath, os.O_RDWR, 0)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("CreateTUN(%q) failed; %s does not exist", name, cloneDevicePath)
-		}
-		return nil, err
-	}
-	err = syscall.SetNonblock(int(nfd), true)
-	if err != nil {
-		return nil, err
-	}
-	fd := os.NewFile(uintptr(nfd), "")
-	return CreateTUNFromFile(fd, 1500)
-}
-
 func CreateTUN(name string, mtu int) (Device, error) {
 	nfd, err := unix.Open(cloneDevicePath, os.O_RDWR, 0)
 	if err != nil {
@@ -490,13 +470,10 @@ func CreateTUNFromFile(file *os.File, mtu int) (Device, error) {
 		statusListenersShutdown: make(chan struct{}),
 		nopi:                    false,
 	}
-
-	log.Print("111111111111")
 	name, err := tun.Name()
 	if err != nil {
 		return nil, err
 	}
-	log.Print("2222222222")
 	//name := "tun0"
 	//err := errors.New("")
 
